@@ -12,7 +12,7 @@ const defaultConfig = {
   isShowText: true,
   currentText: '功德+1',
   totalNumber: 0,
-  isAutoTap: false,
+  isAutoTap: true,
   showCalculateNumber: false,
   alwaysOnTop: true
 };
