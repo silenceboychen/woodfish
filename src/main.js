@@ -114,17 +114,25 @@ function createWindow() {
     width: 140,
     height: 140,
     webPreferences: {
+      // 禁用Node.js集成以提高安全性
       nodeIntegration: false,
+      // 启用上下文隔离以防止渲染器进程访问主进程的API
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, '../assets/images/muyu_icon.png'),
-    resizable: true,
+    // 设置窗口不可调整大小
+    resizable: false,
     alwaysOnTop: config.alwaysOnTop,
+    // 设置窗口无边框
     frame: false,
+    // 设置窗口透明
     transparent: true,
+    // 设置窗口无阴影
     hasShadow: false,
+    // 设置窗口不显示在任务栏
     skipTaskbar: false,
+    // 设置窗口可移动
     movable: true
   });
 

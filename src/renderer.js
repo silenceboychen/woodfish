@@ -119,9 +119,9 @@ function applyTheme(index) {
     }
 
     // 设置背景颜色
-    // if (theme.color) {
-    //   document.body.style.backgroundColor = theme.color;
-    // }
+    if (theme.color) {
+      document.body.style.backgroundColor = theme.color;
+    }
 
     // 设置木鱼图标 - 优先使用绝对路径
     if (theme.absoluteIcon || theme.icon) {
