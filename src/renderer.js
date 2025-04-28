@@ -1,6 +1,9 @@
 // DOM元素
 const appContainer = document.getElementById('app-container');
 const woodfishImg = document.getElementById('woodfish-img');
+const stickImg = document.getElementById('stick-img');
+const stickContainer = document.querySelector('.stick-container');
+const woodfishContainer = document.querySelector('.woodfish-container');
 const meritText = document.getElementById('merit-text');
 const currentCounter = document.getElementById('current-counter');
 const totalCounter = document.getElementById('total-counter');
@@ -39,6 +42,9 @@ let autoTapInterval = null;
 
 // 当前敲击计数
 let currentTapCount = 0;
+
+// 敲击锁定 - 防止用户过快点击
+let tapping = false;
 
 // 初始化应用
 async function initApp() {
@@ -137,39 +143,56 @@ function applyTheme(index) {
 
 // 敲击木鱼
 function tap() {
-  // 播放音效
-  playTapSound();
+  if (tapping) return;
+  tapping = true;
   
-  // 振动效果
-  if ('vibrate' in navigator) {
-    navigator.vibrate(50);
-  }
+  // 添加敲击动画 - 木鱼棒
+  stickContainer.classList.add('tap');
   
-  // 添加敲击动画
-  woodfishImg.classList.add('tap');
+  // 短暂延迟后播放音效和木鱼动画
+  setTimeout(() => {
+    // 播放音效
+    playTapSound();
+    
+    // 振动效果
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    
+    // 添加敲击动画 - 木鱼
+    woodfishImg.classList.add('tap');
+    
+    // 更新计数
+    currentTapCount++;
+    config.totalNumber++;
+    currentCounter.textContent = currentTapCount;
+    totalCounter.textContent = `总计: ${config.totalNumber}`;
+    
+    // 显示功德文字
+    if (config.isShowText) {
+      meritText.textContent = config.currentText || '功德+1';
+      meritText.classList.add('active');
+      setTimeout(() => {
+        meritText.classList.remove('active');
+      }, 500);
+    }
+    
+    // 保存配置（每10次敲击保存一次，减少IO操作）
+    if (config.totalNumber % 10 === 0) {
+      saveConfig();
+    }
+  }, 150);
+  
+  // 短暂延迟后恢复
   setTimeout(() => {
     woodfishImg.classList.remove('tap');
-  }, 100);
-  
-  // 更新计数
-  currentTapCount++;
-  config.totalNumber++;
-  currentCounter.textContent = currentTapCount;
-  totalCounter.textContent = `总计: ${config.totalNumber}`;
-  
-  // 显示功德文字
-  if (config.isShowText) {
-    meritText.textContent = config.currentText || '功德+1';
-    meritText.classList.add('active');
+    
+    // 再延迟一点恢复木鱼棒
     setTimeout(() => {
-      meritText.classList.remove('active');
-    }, 500);
-  }
-  
-  // 保存配置（每10次敲击保存一次，减少IO操作）
-  if (config.totalNumber % 10 === 0) {
-    saveConfig();
-  }
+      stickContainer.classList.remove('tap');
+      tapping = false;
+    }, 100);
+  }, 300);
 }
 
 // 播放敲击音效
@@ -243,7 +266,7 @@ function setControlsState() {
 }
 
 // 事件监听器
-woodfishImg.addEventListener('click', tap);
+woodfishContainer.addEventListener('click', tap);
 
 autoTapBtn.addEventListener('click', toggleAutoTap);
 

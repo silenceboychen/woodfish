@@ -91,6 +91,7 @@ body {
   opacity: 0;
   transform: translateY(0);
   transition: opacity 0.3s, transform 0.3s;
+  z-index: 10;
 }
 
 .merit-text.active {
@@ -98,21 +99,58 @@ body {
   transform: translateY(-30px);
 }
 
-.woodfish-container {
+.woodfish-scene {
+  position: relative;
+  width: 300px;
+  height: 300px;
   display: flex;
   justify-content: center;
-  margin-top: 50px;
+  align-items: flex-end;
+  margin-top: 60px;
+}
+
+.woodfish-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 20px;
 }
 
 #woodfish-img {
-  width: 180px;
+  width: 140px;
   height: auto;
-  cursor: pointer;
   transition: transform 0.1s ease;
 }
 
-#woodfish-img:active, #woodfish-img.tap {
-  transform: scale(0.9);
+#woodfish-img.tap {
+  transform: scale(0.95);
+}
+
+.stick-container {
+  position: absolute;
+  top: 90px;
+  left: 14%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 150px;
+  z-index: 2;
+  transform-origin: 50% 90%;
+  transition: transform 0.2s ease;
+  transform: rotate(-25deg);
+}
+
+#stick-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: rotate(180deg);
+}
+
+.stick-container.tap {
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
 }
 
 .theme-selector {

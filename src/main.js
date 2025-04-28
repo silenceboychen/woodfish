@@ -22,7 +22,7 @@ const themes = [
   { 
     index: 0, 
     name: '传统木鱼', 
-    icon: '../assets/images/muyu_icon.png', 
+    icon: '../assets/images/muyutou_yellow.png', 
     audio: '../assets/audio/muyu_audio.mp3',
     color: '#8B5A2B'
   },
