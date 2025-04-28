@@ -45,11 +45,31 @@ async function initApp() {
     // 设置显示文本
     meritText.textContent = config.currentText || '功德+1';
     
+    // 根据配置更新UI状态
+    updateUIFromConfig();
+    
     // 初始化音频播放器
     initAudioPlayer();
   } catch (error) {
     console.error('初始化应用失败:', error);
   }
+}
+
+// 根据配置更新UI状态
+function updateUIFromConfig() {
+  // 处理显示功德文字设置
+  if (meritText) {
+    meritText.style.display = config.isShowText ? 'block' : 'none';
+  }
+  
+  // 处理显示计数器设置（如果有相关UI元素）
+  const counterElement = document.getElementById('counter');
+  if (counterElement) {
+    counterElement.style.display = config.showCalculateNumber ? 'block' : 'none';
+    counterElement.textContent = `${config.totalNumber || 0}`;
+  }
+  
+  console.log('UI状态已根据配置更新');
 }
 
 // 初始化音频播放器
@@ -180,6 +200,12 @@ function tap(event) {
     currentTapCount++;
     config.totalNumber++;
     
+    // 更新计数器显示
+    const counterElement = document.getElementById('counter');
+    if (counterElement && config.showCalculateNumber) {
+      counterElement.textContent = `${config.totalNumber}`;
+    }
+    
     // 显示功德文字
     if (config.isShowText) {
       meritText.textContent = config.currentText || '功德+1';
@@ -192,12 +218,25 @@ function tap(event) {
     // 保存配置（每10次敲击保存一次，减少IO操作）
     if (config.totalNumber % 10 === 0) {
       console.log(`累计敲击${config.totalNumber}次，保存配置`);
-      saveConfig().then(success => {
+      // 先从主进程获取最新配置
+      window.ipcRenderer.invoke('get-config').then(latestConfig => {
+        // 合并当前内存中的配置和最新配置
+        const mergedConfig = {
+          ...latestConfig,
+          totalNumber: config.totalNumber // 只更新总敲击次数
+        };
+        // 更新内存中的配置
+        config = mergedConfig;
+        // 保存合并后的配置
+        return saveConfig();
+      }).then(success => {
         if (success) {
           console.log('保存成功');
         } else {
           console.error('保存失败');
         }
+      }).catch(err => {
+        console.error('保存过程出错:', err);
       });
     }
   }, 150);
@@ -255,6 +294,15 @@ async function saveConfig() {
     // 移除可能导致循环引用的属性
     if (configCopy.audioPlayer) delete configCopy.audioPlayer;
     
+    // 确保保留用户的设置选项
+    configCopy.isShowText = config.isShowText;
+    configCopy.isAutoTap = config.isAutoTap;
+    configCopy.showCalculateNumber = config.showCalculateNumber;
+    configCopy.alwaysOnTop = config.alwaysOnTop;
+    configCopy.currentTheme = config.currentTheme;
+    
+    console.log('保存配置:', configCopy);
+    
     // 尝试保存配置
     const result = await window.ipcRenderer.invoke('save-config', configCopy);
     if (!result) {
@@ -290,6 +338,20 @@ window.ipcRenderer.on('auto-tap', () => {
 // 更新文字显示状态
 window.ipcRenderer.on('update-show-text', (event, value) => {
   config.isShowText = value;
+  if (meritText) {
+    meritText.style.display = value ? 'block' : 'none';
+  }
+  console.log('更新文字显示状态:', value);
+});
+
+// 更新计数器显示状态
+window.ipcRenderer.on('update-show-counter', (event, value) => {
+  config.showCalculateNumber = value;
+  const counterElement = document.getElementById('counter');
+  if (counterElement) {
+    counterElement.style.display = value ? 'block' : 'none';
+  }
+  console.log('更新计数器显示状态:', value);
 });
 
 // 监听主题切换事件

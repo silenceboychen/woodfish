@@ -228,18 +228,18 @@ function buildTrayMenu(config) {
             }
           } 
         },
-        { 
-          label: '显示计数器', 
-          type: 'checkbox',
-          checked: config.showCalculateNumber,
-          click: (menuItem) => {
-            config.showCalculateNumber = menuItem.checked;
-            saveConfig(config);
-            if (mainWindow) {
-              mainWindow.webContents.send('update-show-counter', menuItem.checked);
-            }
-          }
-        },
+        // { 
+        //   label: '显示计数器', 
+        //   type: 'checkbox',
+        //   checked: config.showCalculateNumber,
+        //   click: (menuItem) => {
+        //     config.showCalculateNumber = menuItem.checked;
+        //     saveConfig(config);
+        //     if (mainWindow) {
+        //       mainWindow.webContents.send('update-show-counter', menuItem.checked);
+        //     }
+        //   }
+        // },
         { type: 'separator' },
         {
           label: '木鱼主题',

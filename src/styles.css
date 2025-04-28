@@ -33,8 +33,18 @@ body {
 }
 
 .counter {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
+  position: absolute;
+  top: 70%;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 5px 10px;
+  border-radius: 15px;
+  -webkit-app-region: no-drag;
+  display: none; /* 默认隐藏，根据设置显示 */
+  z-index: 10;
 }
 
 .total-counter {
