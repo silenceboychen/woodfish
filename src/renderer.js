@@ -18,6 +18,7 @@ const showTextToggle = document.getElementById('show-text-toggle');
 const customTextInput = document.getElementById('custom-text');
 const showCounterToggle = document.getElementById('show-counter-toggle');
 const themeSwitcherToggle = document.getElementById('theme-switcher-toggle');
+const alwaysOnTopToggle = document.getElementById('always-on-top-toggle');
 const textInputContainer = document.getElementById('text-input-container');
 
 // 音频播放器实例
@@ -31,7 +32,8 @@ let config = {
   totalNumber: 0,
   isAutoTap: false,
   showCalculateNumber: true,
-  quickChangeAudio: true
+  quickChangeAudio: true,
+  alwaysOnTop: true
 };
 
 // 木鱼主题列表
@@ -237,6 +239,16 @@ function toggleAutoTap() {
   }
 }
 
+// 设置置顶状态
+async function setAlwaysOnTop(value) {
+  config.alwaysOnTop = value;
+  try {
+    await window.ipcRenderer.invoke('set-always-on-top', value);
+  } catch (error) {
+    console.error('设置置顶状态失败:', error);
+  }
+}
+
 // 保存配置
 async function saveConfig() {
   try {
@@ -253,6 +265,7 @@ function setControlsState() {
   showTextToggle.checked = config.isShowText;
   showCounterToggle.checked = config.showCalculateNumber;
   themeSwitcherToggle.checked = config.quickChangeAudio;
+  alwaysOnTopToggle.checked = config.alwaysOnTop;
   
   // 设置文本输入框
   customTextInput.value = config.currentText || '';
@@ -308,6 +321,12 @@ showCounterToggle.addEventListener('change', () => {
 themeSwitcherToggle.addEventListener('change', () => {
   config.quickChangeAudio = themeSwitcherToggle.checked;
   themeSelector.style.display = config.quickChangeAudio ? 'flex' : 'none';
+  saveConfig();
+});
+
+alwaysOnTopToggle.addEventListener('change', () => {
+  config.alwaysOnTop = alwaysOnTopToggle.checked;
+  setAlwaysOnTop(alwaysOnTopToggle.checked);
   saveConfig();
 });
 
