@@ -1,5 +1,5 @@
 {
-  "name": "muyu-app",
+  "name": "woodfish-app",
   "version": "1.0.0",
   "description": "敲木鱼应用 - Mac客户端",
   "main": "src/main.js",
@@ -16,7 +16,7 @@
     "electron-builder": "^24.9.1"
   },
   "build": {
-    "appId": "com.muyu.app",
+    "appId": "com.woodfish.app",
     "productName": "木鱼",
     "mac": {
       "category": "public.app-category.entertainment"

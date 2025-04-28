@@ -6,22 +6,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container" id="app-container">
-    <div class="header">
-      <div class="counter-display" id="counter-display">
-        <div class="counter" id="current-counter">0</div>
-        <div class="total-counter" id="total-counter">总计: 0</div>
-      </div>
-      <div class="buttons">
-        <button id="auto-tap-btn" class="icon-button">
-          <img src="../assets/images/auto_icon.png" alt="自动敲击" title="自动敲击">
-        </button>
-        <button id="settings-btn" class="icon-button">
-          <img src="../assets/images/set.png" alt="设置" title="设置">
-        </button>
-      </div>
-    </div>
 
+  <div class="container" id="app-container">
     <div class="main-content">
       <div class="merit-text" id="merit-text">功德+1</div>
       <div class="woodfish-scene">
@@ -33,47 +19,8 @@
         </div>
       </div>
     </div>
-
-    <div class="theme-selector" id="theme-selector">
-      <!-- 主题选择器将通过JS动态填充 -->
-    </div>
-  </div>
-
-  <div class="settings-modal" id="settings-modal">
-    <div class="settings-content">
-      <div class="settings-header">
-        <h2>设置</h2>
-        <button id="close-settings-btn" class="close-btn">×</button>
-      </div>
-      <div class="settings-body">
-        <div class="setting-item">
-          <label for="auto-tap-toggle">自动敲击</label>
-          <input type="checkbox" id="auto-tap-toggle" class="toggle">
-        </div>
-        <div class="setting-item">
-          <label for="show-text-toggle">显示功德文字</label>
-          <input type="checkbox" id="show-text-toggle" class="toggle">
-        </div>
-        <div class="setting-item text-input-container" id="text-input-container">
-          <label for="custom-text">自定义文字</label>
-          <input type="text" id="custom-text" placeholder="功德+1">
-        </div>
-        <div class="setting-item">
-          <label for="show-counter-toggle">显示计数器</label>
-          <input type="checkbox" id="show-counter-toggle" class="toggle">
-        </div>
-        <div class="setting-item">
-          <label for="theme-switcher-toggle">主题快速切换</label>
-          <input type="checkbox" id="theme-switcher-toggle" class="toggle">
-        </div>
-        <div class="setting-item">
-          <label for="always-on-top-toggle">置顶显示</label>
-          <input type="checkbox" id="always-on-top-toggle" class="toggle">
-        </div>
-      </div>
-    </div>
   </div>
 
   <script src="renderer.js"></script>
 </body>
-</html> 
+</html>

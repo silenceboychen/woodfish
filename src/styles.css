@@ -6,8 +6,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: #8B5A2B;
-  color: white;
+  background-color: transparent;
+  color: rgb(240, 5, 5);
   height: 100vh;
   overflow: hidden;
   -webkit-user-select: none;
@@ -20,19 +20,16 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
+  background-color: transparent;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
+  -webkit-app-region: drag;
 }
 
 .counter-display {
   display: flex;
   flex-direction: column;
+  -webkit-app-region: no-drag;
 }
 
 .counter {
@@ -52,6 +49,7 @@ body {
 .buttons {
   display: flex;
   gap: 10px;
+  -webkit-app-region: no-drag;
 }
 
 .icon-button {
@@ -63,6 +61,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-app-region: no-drag;
 }
 
 .icon-button img {
@@ -81,17 +80,21 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-app-region: drag;
 }
 
 .merit-text {
   font-size: 20px;
   font-weight: bold;
   position: absolute;
-  top: 30%;
+  top: 20%;
   opacity: 0;
   transform: translateY(0);
   transition: opacity 0.3s, transform 0.3s;
   z-index: 10;
+  -webkit-app-region: no-drag;
 }
 
 .merit-text.active {
@@ -101,12 +104,13 @@ body {
 
 .woodfish-scene {
   position: relative;
-  width: 300px;
-  height: 300px;
+  /* width: 140px; */
+  /* height: 200px; */
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  margin-top: 60px;
+  /* margin-top: 20px; */
+  -webkit-app-region: drag;
 }
 
 .woodfish-container {
@@ -115,13 +119,17 @@ body {
   display: flex;
   justify-content: center;
   cursor: pointer;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
+  -webkit-app-region: no-drag;
+  padding-left: 34px;
+  padding-top: 60px;
 }
 
 #woodfish-img {
-  width: 140px;
+  width: 100px;
   height: auto;
   transition: transform 0.1s ease;
+  cursor: pointer;
 }
 
 #woodfish-img.tap {
@@ -130,15 +138,17 @@ body {
 
 .stick-container {
   position: absolute;
-  top: 90px;
-  left: 14%;
-  transform: translateX(-50%);
-  width: 140px;
-  height: 150px;
+  top: 40px;
+  left: 0%;
+  /* transform: translateX(-50%); */
+  width: 100px;
+  /* height: 150px; */
   z-index: 2;
   transform-origin: 50% 90%;
   transition: transform 0.2s ease;
   transform: rotate(-25deg);
+  -webkit-app-region: no-drag;
+  pointer-events: none;
 }
 
 #stick-img {
@@ -146,6 +156,7 @@ body {
   height: 100%;
   object-fit: contain;
   transform: rotate(180deg);
+  pointer-events: none;
 }
 
 .stick-container.tap {
@@ -155,11 +166,12 @@ body {
 
 .theme-selector {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
-  overflow-x: auto;
+  margin-top: 10px;
   padding-bottom: 10px;
+  width: 100%;
 }
 
 .theme-option {
@@ -172,6 +184,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .theme-option.active {
@@ -182,6 +195,20 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.setting-section {
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.setting-section-title {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 /* 设置窗口 */
@@ -298,4 +325,56 @@ body {
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-top: 5px;
+}
+
+.drag-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  -webkit-app-region: drag;
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.drag-bar:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.window-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.window-control-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.window-control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#close-btn:hover {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+.drag-text {
+  -webkit-app-region: drag;
 } 

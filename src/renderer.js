@@ -5,21 +5,6 @@ const stickImg = document.getElementById('stick-img');
 const stickContainer = document.querySelector('.stick-container');
 const woodfishContainer = document.querySelector('.woodfish-container');
 const meritText = document.getElementById('merit-text');
-const currentCounter = document.getElementById('current-counter');
-const totalCounter = document.getElementById('total-counter');
-const counterDisplay = document.getElementById('counter-display');
-const themeSelector = document.getElementById('theme-selector');
-const autoTapBtn = document.getElementById('auto-tap-btn');
-const settingsBtn = document.getElementById('settings-btn');
-const settingsModal = document.getElementById('settings-modal');
-const closeSettingsBtn = document.getElementById('close-settings-btn');
-const autoTapToggle = document.getElementById('auto-tap-toggle');
-const showTextToggle = document.getElementById('show-text-toggle');
-const customTextInput = document.getElementById('custom-text');
-const showCounterToggle = document.getElementById('show-counter-toggle');
-const themeSwitcherToggle = document.getElementById('theme-switcher-toggle');
-const alwaysOnTopToggle = document.getElementById('always-on-top-toggle');
-const textInputContainer = document.getElementById('text-input-container');
 
 // 音频播放器实例
 let audioPlayer = null;
@@ -27,20 +12,13 @@ let audioPlayer = null;
 // 应用状态
 let config = {
   currentTheme: 0,
-  isShowText: false,
+  isShowText: true,  // 默认为true，显示功德文字
   currentText: '功德+1',
-  totalNumber: 0,
-  isAutoTap: false,
-  showCalculateNumber: true,
-  quickChangeAudio: true,
-  alwaysOnTop: true
+  totalNumber: 0
 };
 
 // 木鱼主题列表
 let themes = [];
-
-// 自动敲击定时器
-let autoTapInterval = null;
 
 // 当前敲击计数
 let currentTapCount = 0;
@@ -51,31 +29,21 @@ let tapping = false;
 // 初始化应用
 async function initApp() {
   try {
+    console.log('正在初始化应用...');
+    
     // 获取配置
     config = await window.ipcRenderer.invoke('get-config');
+    console.log('已加载配置:', config);
     
     // 获取主题列表
     themes = await window.ipcRenderer.invoke('get-themes');
-    
-    // 渲染主题选择器
-    renderThemeSelector();
+    console.log('已加载主题:', themes);
     
     // 应用当前主题
     applyTheme(config.currentTheme);
     
-    // 设置计数器
-    totalCounter.textContent = `总计: ${config.totalNumber}`;
-    
     // 设置显示文本
     meritText.textContent = config.currentText || '功德+1';
-    
-    // 设置控件状态
-    setControlsState();
-    
-    // 如果启用了自动敲击，启动自动敲击
-    if (config.isAutoTap) {
-      startAutoTap();
-    }
     
     // 初始化音频播放器
     initAudioPlayer();
@@ -86,36 +54,36 @@ async function initApp() {
 
 // 初始化音频播放器
 function initAudioPlayer() {
-  const currentTheme = themes[config.currentTheme];
-  const audioPath = currentTheme.audio;
-  
-  audioPlayer = new Audio(audioPath);
-  audioPlayer.preload = 'auto';
-}
-
-// 渲染主题选择器
-function renderThemeSelector() {
-  themeSelector.innerHTML = '';
-  
-  themes.forEach((theme, index) => {
-    const themeOption = document.createElement('div');
-    themeOption.className = `theme-option ${index === config.currentTheme ? 'active' : ''}`;
-    themeOption.dataset.index = index;
+  try {
+    if (!themes || !themes[config.currentTheme]) {
+      console.error('主题未加载或索引无效:', config.currentTheme);
+      return;
+    }
     
-    const themeImg = document.createElement('img');
-    themeImg.src = theme.icon;
-    themeImg.alt = theme.name;
+    // 使用主题中的音频路径
+    const audioPath = themes[config.currentTheme].audio || '../assets/audio/muyu_audio.mp3';
+    console.log('初始化音频:', audioPath);
     
-    themeOption.appendChild(themeImg);
-    themeSelector.appendChild(themeOption);
-    
-    themeOption.addEventListener('click', () => {
-      setTheme(index);
-    });
-  });
-  
-  // 显示或隐藏主题选择器
-  themeSelector.style.display = config.quickChangeAudio ? 'flex' : 'none';
+    // 通过IPC获取绝对路径
+    window.ipcRenderer.invoke('get-asset-path', audioPath)
+      .then(absolutePath => {
+        console.log('音频绝对路径:', absolutePath);
+        audioPlayer = new Audio(audioPath);
+        audioPlayer.preload = 'auto';
+        audioPlayer.volume = 1.0; // 确保音量最大
+        // 预加载测试播放
+        audioPlayer.load();
+      })
+      .catch(error => {
+        console.error('获取音频路径失败:', error);
+        // 尝试直接使用相对路径
+        audioPlayer = new Audio(audioPath);
+        audioPlayer.preload = 'auto';
+        audioPlayer.load();
+      });
+  } catch (error) {
+    console.error('初始化音频播放器失败:', error);
+  }
 }
 
 // 设置主题
@@ -126,12 +94,6 @@ async function setTheme(index) {
   await saveConfig();
   applyTheme(index);
   
-  // 更新主题选择器的激活状态
-  const themeOptions = document.querySelectorAll('.theme-option');
-  themeOptions.forEach(option => {
-    option.classList.toggle('active', parseInt(option.dataset.index) === index);
-  });
-  
   // 重新初始化音频播放器
   initAudioPlayer();
 }
@@ -139,13 +101,21 @@ async function setTheme(index) {
 // 应用主题
 function applyTheme(index) {
   const theme = themes[index];
-  document.body.style.backgroundColor = theme.color;
+  // document.body.style.backgroundColor = theme.color;
   woodfishImg.src = theme.icon;
 }
 
 // 敲击木鱼
-function tap() {
+function tap(event) {
   if (tapping) return;
+  
+  // 如果是拖动操作，不执行敲击
+  if (event && event.target && (event.target === appContainer || event.target === document.querySelector('.main-content'))) {
+    console.log('忽略拖动区域点击');
+    return;
+  }
+  
+  console.log('执行敲击，点击目标:', event ? event.target : '自动敲击');
   tapping = true;
   
   // 添加敲击动画 - 木鱼棒
@@ -167,8 +137,6 @@ function tap() {
     // 更新计数
     currentTapCount++;
     config.totalNumber++;
-    currentCounter.textContent = currentTapCount;
-    totalCounter.textContent = `总计: ${config.totalNumber}`;
     
     // 显示功德文字
     if (config.isShowText) {
@@ -181,7 +149,14 @@ function tap() {
     
     // 保存配置（每10次敲击保存一次，减少IO操作）
     if (config.totalNumber % 10 === 0) {
-      saveConfig();
+      console.log(`累计敲击${config.totalNumber}次，保存配置`);
+      saveConfig().then(success => {
+        if (success) {
+          console.log('保存成功');
+        } else {
+          console.error('保存失败');
+        }
+      });
     }
   }, 150);
   
@@ -199,135 +174,80 @@ function tap() {
 
 // 播放敲击音效
 function playTapSound() {
-  if (audioPlayer) {
+  if (!audioPlayer) {
+    console.error('音频播放器未初始化');
+    // 尝试重新初始化音频播放器
+    initAudioPlayer();
+    return;
+  }
+  
+  try {
     // 重置音频并播放
     audioPlayer.currentTime = 0;
-    audioPlayer.play().catch(error => {
-      console.error('播放音频失败:', error);
-    });
-  }
-}
-
-// 开始自动敲击
-function startAutoTap() {
-  if (autoTapInterval) return;
-  
-  config.isAutoTap = true;
-  saveConfig();
-  
-  autoTapInterval = setInterval(() => {
-    tap();
-  }, 1000);
-}
-
-// 停止自动敲击
-function stopAutoTap() {
-  if (!autoTapInterval) return;
-  
-  clearInterval(autoTapInterval);
-  autoTapInterval = null;
-  config.isAutoTap = false;
-  saveConfig();
-}
-
-// 切换自动敲击状态
-function toggleAutoTap() {
-  if (config.isAutoTap) {
-    stopAutoTap();
-  } else {
-    startAutoTap();
-  }
-}
-
-// 设置置顶状态
-async function setAlwaysOnTop(value) {
-  config.alwaysOnTop = value;
-  try {
-    await window.ipcRenderer.invoke('set-always-on-top', value);
+    const playPromise = audioPlayer.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.error('播放音频失败:', error);
+        // 用户交互问题，尝试重新初始化
+        initAudioPlayer();
+      });
+    }
   } catch (error) {
-    console.error('设置置顶状态失败:', error);
+    console.error('播放音频时出错:', error);
   }
 }
 
 // 保存配置
 async function saveConfig() {
   try {
-    await window.ipcRenderer.invoke('save-config', config);
+    // 确保配置对象有效
+    if (!config) {
+      console.error('配置对象无效');
+      return false;
+    }
+    
+    // 确保配置对象可序列化
+    const configCopy = { ...config };
+    
+    // 移除可能导致循环引用的属性
+    if (configCopy.audioPlayer) delete configCopy.audioPlayer;
+    
+    // 尝试保存配置
+    const result = await window.ipcRenderer.invoke('save-config', configCopy);
+    if (!result) {
+      console.error('保存配置失败: 主进程返回失败');
+    }
+    return result;
   } catch (error) {
     console.error('保存配置失败:', error);
+    return false;
   }
-}
-
-// 设置控件状态
-function setControlsState() {
-  // 设置开关状态
-  autoTapToggle.checked = config.isAutoTap;
-  showTextToggle.checked = config.isShowText;
-  showCounterToggle.checked = config.showCalculateNumber;
-  themeSwitcherToggle.checked = config.quickChangeAudio;
-  alwaysOnTopToggle.checked = config.alwaysOnTop;
-  
-  // 设置文本输入框
-  customTextInput.value = config.currentText || '';
-  textInputContainer.style.display = config.isShowText ? 'flex' : 'none';
-  
-  // 设置计数器显示
-  counterDisplay.style.display = config.showCalculateNumber ? 'flex' : 'none';
-  
-  // 设置主题选择器显示
-  themeSelector.style.display = config.quickChangeAudio ? 'flex' : 'none';
 }
 
 // 事件监听器
 woodfishContainer.addEventListener('click', tap);
+woodfishImg.addEventListener('click', tap); // 直接为木鱼图像添加点击事件
 
-autoTapBtn.addEventListener('click', toggleAutoTap);
-
-settingsBtn.addEventListener('click', () => {
-  settingsModal.classList.add('active');
+// 鼠标悬停效果
+woodfishContainer.addEventListener('mouseenter', () => {
+  woodfishImg.style.transform = 'scale(1.05)';
 });
 
-closeSettingsBtn.addEventListener('click', () => {
-  settingsModal.classList.remove('active');
-});
-
-autoTapToggle.addEventListener('change', () => {
-  config.isAutoTap = autoTapToggle.checked;
-  if (config.isAutoTap) {
-    startAutoTap();
-  } else {
-    stopAutoTap();
+woodfishContainer.addEventListener('mouseleave', () => {
+  if (!woodfishImg.classList.contains('tap')) {
+    woodfishImg.style.transform = '';
   }
-  saveConfig();
 });
 
-showTextToggle.addEventListener('change', () => {
-  config.isShowText = showTextToggle.checked;
-  textInputContainer.style.display = config.isShowText ? 'flex' : 'none';
-  saveConfig();
+// 接收自动敲击消息
+window.ipcRenderer.on('auto-tap', () => {
+  tap();
 });
 
-customTextInput.addEventListener('input', () => {
-  config.currentText = customTextInput.value;
-  saveConfig();
-});
-
-showCounterToggle.addEventListener('change', () => {
-  config.showCalculateNumber = showCounterToggle.checked;
-  counterDisplay.style.display = config.showCalculateNumber ? 'flex' : 'none';
-  saveConfig();
-});
-
-themeSwitcherToggle.addEventListener('change', () => {
-  config.quickChangeAudio = themeSwitcherToggle.checked;
-  themeSelector.style.display = config.quickChangeAudio ? 'flex' : 'none';
-  saveConfig();
-});
-
-alwaysOnTopToggle.addEventListener('change', () => {
-  config.alwaysOnTop = alwaysOnTopToggle.checked;
-  setAlwaysOnTop(alwaysOnTopToggle.checked);
-  saveConfig();
+// 更新文字显示状态
+window.ipcRenderer.on('update-show-text', (event, value) => {
+  config.isShowText = value;
 });
 
 // 初始化应用
