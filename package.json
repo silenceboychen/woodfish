@@ -1,0 +1,30 @@
+{
+  "name": "muyu-app",
+  "version": "1.0.0",
+  "description": "敲木鱼应用 - Mac客户端",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.muyu.app",
+    "productName": "木鱼",
+    "mac": {
+      "category": "public.app-category.entertainment"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*"
+    ]
+  }
+} 
