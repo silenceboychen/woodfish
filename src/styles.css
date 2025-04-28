@@ -104,12 +104,9 @@ body {
 
 .woodfish-scene {
   position: relative;
-  /* width: 140px; */
-  /* height: 200px; */
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  /* margin-top: 20px; */
   -webkit-app-region: drag;
 }
 
@@ -119,7 +116,6 @@ body {
   display: flex;
   justify-content: center;
   cursor: pointer;
-  /* margin-bottom: 20px; */
   -webkit-app-region: no-drag;
   padding-left: 34px;
   padding-top: 60px;
@@ -140,9 +136,7 @@ body {
   position: absolute;
   top: 40px;
   left: 0%;
-  /* transform: translateX(-50%); */
   width: 100px;
-  /* height: 150px; */
   z-index: 2;
   transform-origin: 50% 90%;
   transition: transform 0.2s ease;

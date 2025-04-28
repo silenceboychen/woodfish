@@ -59,28 +59,38 @@ function initAudioPlayer() {
       console.error('主题未加载或索引无效:', config.currentTheme);
       return;
     }
-    
-    // 使用主题中的音频路径
-    const audioPath = themes[config.currentTheme].audio || '../assets/audio/muyu_audio.mp3';
+
+    const theme = themes[config.currentTheme];
+    // 优先使用绝对路径
+    const audioPath = theme.absoluteAudio || theme.audio || '../assets/audio/muyu_audio.mp3';
     console.log('初始化音频:', audioPath);
-    
-    // 通过IPC获取绝对路径
-    window.ipcRenderer.invoke('get-asset-path', audioPath)
-      .then(absolutePath => {
-        console.log('音频绝对路径:', absolutePath);
-        audioPlayer = new Audio(audioPath);
-        audioPlayer.preload = 'auto';
-        audioPlayer.volume = 1.0; // 确保音量最大
-        // 预加载测试播放
-        audioPlayer.load();
-      })
-      .catch(error => {
-        console.error('获取音频路径失败:', error);
-        // 尝试直接使用相对路径
-        audioPlayer = new Audio(audioPath);
-        audioPlayer.preload = 'auto';
-        audioPlayer.load();
-      });
+
+    // 创建新的音频实例
+    audioPlayer = new Audio(audioPath);
+    audioPlayer.preload = 'auto';
+    audioPlayer.volume = 1.0;
+
+    // 处理音频加载错误
+    audioPlayer.onerror = (e) => {
+      console.error('音频加载失败:', e);
+      // 尝试使用IPC获取绝对路径
+      if (theme.audio) {
+        window.ipcRenderer.invoke('get-asset-path', theme.audio)
+          .then(absolutePath => {
+            console.log('使用IPC获取的绝对路径加载音频:', absolutePath);
+            audioPlayer = new Audio(absolutePath);
+            audioPlayer.preload = 'auto';
+            audioPlayer.volume = 1.0;
+            audioPlayer.load();
+          })
+          .catch(err => {
+            console.error('IPC获取音频绝对路径失败:', err);
+          });
+      }
+    };
+
+    // 预加载音频
+    audioPlayer.load();
   } catch (error) {
     console.error('初始化音频播放器失败:', error);
   }
@@ -100,9 +110,41 @@ async function setTheme(index) {
 
 // 应用主题
 function applyTheme(index) {
-  const theme = themes[index];
-  // document.body.style.backgroundColor = theme.color;
-  woodfishImg.src = theme.icon;
+  try {
+    console.log(`应用主题 ${index}`);
+    const theme = themes[index];
+    if (!theme) {
+      console.error('主题不存在:', index);
+      return;
+    }
+
+    // 设置背景颜色
+    // if (theme.color) {
+    //   document.body.style.backgroundColor = theme.color;
+    // }
+
+    // 设置木鱼图标 - 优先使用绝对路径
+    if (theme.absoluteIcon || theme.icon) {
+      console.log('设置木鱼图标:', theme.absoluteIcon || theme.icon);
+      woodfishImg.src = theme.absoluteIcon || theme.icon;
+      
+      // 图像加载错误时的处理
+      woodfishImg.onerror = (e) => {
+        console.error('木鱼图标加载失败:', e);
+        // 尝试使用IPC获取绝对路径
+        window.ipcRenderer.invoke('get-asset-path', theme.icon)
+          .then(absolutePath => {
+            console.log('使用IPC获取的绝对路径加载图标:', absolutePath);
+            woodfishImg.src = absolutePath;
+          })
+          .catch(err => {
+            console.error('IPC获取绝对路径失败:', err);
+          });
+      };
+    }
+  } catch (error) {
+    console.error('应用主题失败:', error);
+  }
 }
 
 // 敲击木鱼
@@ -248,6 +290,19 @@ window.ipcRenderer.on('auto-tap', () => {
 // 更新文字显示状态
 window.ipcRenderer.on('update-show-text', (event, value) => {
   config.isShowText = value;
+});
+
+// 监听主题切换事件
+window.ipcRenderer.on('update-theme', (event, themeIndex) => {
+  console.log('收到主题切换事件:', themeIndex);
+  if (themes && themes[themeIndex]) {
+    applyTheme(themeIndex);
+    config.currentTheme = themeIndex;
+    // 重新初始化音频播放器以使用新主题的音效
+    initAudioPlayer();
+  } else {
+    console.error('无效的主题索引:', themeIndex);
+  }
 });
 
 // 初始化应用

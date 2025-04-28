@@ -21,28 +21,28 @@ const defaultConfig = {
 const themes = [
   { 
     index: 0, 
-    name: '传统木鱼', 
+    name: '木鱼1',
     icon: '../assets/images/muyutou_yellow.png', 
     audio: '../assets/audio/muyu_audio.mp3',
     color: '#8B5A2B'
   },
   { 
     index: 1, 
-    name: '传统木鱼', 
+    name: '木鱼2',
     icon: '../assets/images/muyutou_white.png', 
     audio: '../assets/audio/muyu_audio.mp3',
     color: '#9370DB'
   },
   { 
     index: 2, 
-    name: '传统木鱼', 
+    name: '木鱼3',
     icon: '../assets/images/muyutou_sliver.png', 
     audio: '../assets/audio/muyu_audio.mp3',
     color: '#DC143C'
   },
   { 
     index: 3, 
-    name: '传统木鱼', 
+    name: '木鱼4',
     icon: '../assets/images/muyutou_red.png', 
     audio: '../assets/audio/muyu_audio.mp3',
     color: '#556B2F'
@@ -236,15 +236,30 @@ function buildTrayMenu(config) {
         {
           label: '木鱼主题',
           submenu: themes.map((theme, index) => ({
-            label: `主题 ${index + 1}`,
+            label: `${theme.name || `主题 ${index + 1}`}`,
             type: 'radio',
             checked: config.currentTheme === index,
             click: () => {
-              config.currentTheme = index;
-              saveConfig(config);
-              if (mainWindow) {
-                mainWindow.webContents.send('update-theme', index);
+              console.log(`切换主题: ${index}`);
+
+              // 更新配置
+              const updatedConfig = loadConfig();
+              updatedConfig.currentTheme = index;
+              const saved = saveConfig(updatedConfig);
+
+              if (saved) {
+                console.log(`主题已保存: ${index}`);
+
+                // 通知渲染进程
+                if (mainWindow) {
+                  console.log('通知渲染进程切换主题');
+                  mainWindow.webContents.send('update-theme', index);
+                }
+              } else {
+                console.error('保存主题失败');
               }
+              // 更新托盘菜单
+              updateTrayMenu();
             }
           }))
         }
@@ -269,7 +284,7 @@ function createTray() {
     // 设置托盘菜单
     const config = loadConfig();
     const contextMenu = buildTrayMenu(config);
-    
+
     tray.setToolTip('木鱼');
     tray.setContextMenu(contextMenu);
     
@@ -331,8 +346,37 @@ ipcMain.handle('save-config', (event, config) => {
   return result;
 });
 
+// 添加处理主题资源路径的函数
+function resolveThemeAssetPath(relativePath) {
+  try {
+    const cleanPath = relativePath.replace(/^\.\.\//, '');
+    const absolutePath = path.join(__dirname, '..', cleanPath);
+    
+    if (fs.existsSync(absolutePath)) {
+      return absolutePath;
+    } else {
+      console.warn(`资源文件不存在: ${absolutePath}`);
+      return null;
+    }
+  } catch (error) {
+    console.error('解析资源路径失败:', error);
+    return null;
+  }
+}
+
+// 在get-themes处理函数中增加绝对路径信息
 ipcMain.handle('get-themes', () => {
-  return themes;
+  const themesWithAbsolutePaths = themes.map(theme => {
+    const result = { ...theme };
+    if (theme.icon) {
+      result.absoluteIcon = resolveThemeAssetPath(theme.icon) || theme.icon;
+    }
+    if (theme.audio) {
+      result.absoluteAudio = resolveThemeAssetPath(theme.audio) || theme.audio;
+    }
+    return result;
+  });
+  return themesWithAbsolutePaths;
 });
 
 // 添加置顶和取消置顶的IPC处理
