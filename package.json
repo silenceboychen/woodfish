@@ -9,8 +9,16 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "morty <silenceboychen@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silenceboychen/woodfish.git"
+  },
+  "homepage": "https://github.com/silenceboychen/woodfish",
+  "bugs": {
+    "url": "https://github.com/silenceboychen/woodfish/issues"
+  },
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
