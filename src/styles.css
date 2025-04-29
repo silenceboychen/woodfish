@@ -11,6 +11,7 @@ body {
   height: 100vh;
   overflow: hidden;
   -webkit-user-select: none;
+  -webkit-app-region: drag;
   user-select: none;
   transition: background-color 0.3s ease;
 }
@@ -104,7 +105,7 @@ body {
   transform: translateY(0);
   transition: opacity 0.3s, transform 0.3s;
   z-index: 10;
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
 }
 
 .merit-text.active {
@@ -126,7 +127,7 @@ body {
   display: flex;
   justify-content: center;
   cursor: pointer;
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
   padding-left: 34px;
   padding-top: 60px;
 }
@@ -136,6 +137,8 @@ body {
   height: auto;
   transition: transform 0.1s ease;
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
 }
 
 #woodfish-img.tap {
@@ -151,7 +154,7 @@ body {
   transform-origin: 50% 90%;
   transition: transform 0.2s ease;
   transform: rotate(-25deg);
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
   pointer-events: none;
 }
 
