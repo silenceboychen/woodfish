@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -263,6 +263,13 @@ function buildTrayMenu(config) {
       label: '设置',
       click: () => {
         createSettingsWindow();
+      }
+    },
+    { type: 'separator' },
+    {
+      label: '开源地址',
+      click: () => {
+        shell.openExternal('https://github.com/silenceboychen/woodfish');
       }
     },
     { type: 'separator' },
