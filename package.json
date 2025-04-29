@@ -27,7 +27,17 @@
     "appId": "com.woodfish.app",
     "productName": "木鱼",
     "mac": {
-      "category": "public.app-category.entertainment"
+      "category": "public.app-category.entertainment",
+      "icon": "assets/images/muyu_icon_512.png",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "icon": "assets/images/muyu_icon_512.png",
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "icon": "assets/images/muyu_icon_512.png",
+      "target": ["AppImage", "deb"]
     },
     "files": [
       "src/**/*",

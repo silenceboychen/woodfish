@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -86,6 +86,7 @@ function saveConfig(config) {
 }
 
 let mainWindow;
+let settingsWindow = null;
 let tray = null;
 let autoTapInterval = null;
 
@@ -109,8 +110,9 @@ function stopAutoTap() {
 
 function createWindow() {
   const config = loadConfig();
-  
-  mainWindow = new BrowserWindow({
+
+  // 创建窗口配置
+  const windowOptions = {
     width: 140,
     height: 140,
     webPreferences: {
@@ -120,7 +122,6 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    icon: path.join(__dirname, '../assets/images/muyu_icon.png'),
     // 设置窗口不可调整大小
     resizable: false,
     alwaysOnTop: config.alwaysOnTop,
@@ -134,7 +135,21 @@ function createWindow() {
     skipTaskbar: false,
     // 设置窗口可移动
     movable: true
-  });
+  };
+
+  // 非macOS平台设置窗口图标
+  if (process.platform !== 'darwin') {
+    const iconPath = path.join(__dirname, '../assets/images/muyu_icon_512.png');
+    if (fs.existsSync(iconPath)) {
+      windowOptions.icon = nativeImage.createFromPath(iconPath);
+      console.log('设置窗口图标:', iconPath);
+    } else {
+      console.error('窗口图标文件不存在:', iconPath);
+    }
+  }
+  
+  // 创建主窗口
+  mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   
@@ -165,6 +180,61 @@ function createWindow() {
   }
 }
 
+// 创建设置窗口
+function createSettingsWindow() {
+  // 如果设置窗口已经存在，则只需显示它
+  if (settingsWindow) {
+    settingsWindow.show();
+    return;
+  }
+  
+  // 创建设置窗口配置
+  const settingsWindowOptions = {
+    width: 500,
+    height: 600,
+    title: '木鱼设置',
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    parent: mainWindow,
+    modal: true,
+    show: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  };
+  
+  // 非macOS平台设置窗口图标
+  if (process.platform !== 'darwin') {
+    const iconPath = path.join(__dirname, '../assets/images/muyu_icon_512.png');
+    if (fs.existsSync(iconPath)) {
+      settingsWindowOptions.icon = nativeImage.createFromPath(iconPath);
+      console.log('设置窗口图标:', iconPath);
+    }
+  }
+  
+  // 创建新的设置窗口
+  settingsWindow = new BrowserWindow(settingsWindowOptions);
+  
+  // 加载设置页面
+  settingsWindow.loadFile(path.join(__dirname, 'settings.html'));
+  
+  // 窗口准备好时显示
+  settingsWindow.once('ready-to-show', () => {
+    settingsWindow.show();
+  });
+  
+  // 可以在开发环境中打开开发者工具
+  // settingsWindow.webContents.openDevTools();
+  
+  // 窗口关闭时释放引用
+  settingsWindow.on('closed', () => {
+    settingsWindow = null;
+  });
+}
+
 function updateTrayMenu() {
   if (!tray) return;
   
@@ -188,90 +258,9 @@ function buildTrayMenu(config) {
     { type: 'separator' },
     {
       label: '设置',
-      submenu: [
-        { 
-          label: '置顶显示', 
-          type: 'checkbox',
-          checked: config.alwaysOnTop,
-          click: (menuItem) => {
-            config.alwaysOnTop = menuItem.checked;
-            saveConfig(config);
-            if (mainWindow) {
-              mainWindow.setAlwaysOnTop(menuItem.checked);
-            }
-          } 
-        },
-        { 
-          label: '自动敲击', 
-          type: 'checkbox',
-          checked: config.isAutoTap,
-          click: (menuItem) => {
-            config.isAutoTap = menuItem.checked;
-            saveConfig(config);
-            
-            if (menuItem.checked) {
-              startAutoTap();
-            } else {
-              stopAutoTap();
-            }
-          } 
-        },
-        { 
-          label: '显示功德文字', 
-          type: 'checkbox',
-          checked: config.isShowText,
-          click: (menuItem) => {
-            config.isShowText = menuItem.checked;
-            saveConfig(config);
-            if (mainWindow) {
-              mainWindow.webContents.send('update-show-text', menuItem.checked);
-            }
-          } 
-        },
-        // { 
-        //   label: '显示计数器', 
-        //   type: 'checkbox',
-        //   checked: config.showCalculateNumber,
-        //   click: (menuItem) => {
-        //     config.showCalculateNumber = menuItem.checked;
-        //     saveConfig(config);
-        //     if (mainWindow) {
-        //       mainWindow.webContents.send('update-show-counter', menuItem.checked);
-        //     }
-        //   }
-        // },
-        { type: 'separator' },
-        {
-          label: '木鱼主题',
-          submenu: themes.map((theme, index) => ({
-            label: `${theme.name || `主题 ${index + 1}`}`,
-            type: 'radio',
-            checked: config.currentTheme === index,
-            click: () => {
-              console.log(`切换主题: ${index}`);
-
-              // 更新配置
-              const updatedConfig = loadConfig();
-              updatedConfig.currentTheme = index;
-              const saved = saveConfig(updatedConfig);
-
-              if (saved) {
-                console.log(`主题已保存: ${index}`);
-
-                // 通知渲染进程
-                if (mainWindow) {
-                  console.log('通知渲染进程切换主题');
-                  mainWindow.webContents.send('update-theme', index);
-                }
-              } else {
-                console.error('保存主题失败');
-              }
-              // 更新托盘菜单
-              updateTrayMenu();
-            }
-          }))
-        }
-      ]
+      click: () => {
+        createSettingsWindow();
+      }
     },
     { type: 'separator' },
     { 
@@ -285,165 +274,172 @@ function buildTrayMenu(config) {
 }
 
 function createTray() {
-  // 创建托盘图标
+  // 防止重复创建
+  if (tray !== null) {
+    return;
+  }
   try {
-    tray = new Tray(path.join(__dirname, '../assets/images/muyu_icon.png'));
+    // 加载图标
+    let iconPath = path.join(__dirname, '../assets/images/muyu_icon.png');
     
-    // 设置托盘菜单
-    const config = loadConfig();
-    const contextMenu = buildTrayMenu(config);
-
-    tray.setToolTip('木鱼');
-    tray.setContextMenu(contextMenu);
+    // 确保图标文件存在
+    if (!fs.existsSync(iconPath)) {
+      console.error('托盘图标文件不存在:', iconPath);
+      // 尝试备用图标
+      iconPath = path.join(__dirname, '../assets/images/muyutou_yellow.png');
+      if (!fs.existsSync(iconPath)) {
+        console.error('备用图标也不存在');
+        return;
+      }
+    }
     
-    // 点击托盘图标显示窗口
+    // 为macOS创建适当的图标
+    let icon;
+    if (process.platform === 'darwin') {
+      // macOS上使用模板图标，自动适应深色/浅色模式
+      icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 });
+      icon.setTemplateImage(true); // 设置为模板图标
+    } else {
+      icon = nativeImage.createFromPath(iconPath);
+    }
+    
+    // 创建托盘
+    tray = new Tray(icon);
+    tray.setToolTip('木鱼应用');
+    
+    // 创建托盘菜单
+    updateTrayMenu();
+    
+    // 单击托盘图标显示/隐藏主窗口
     tray.on('click', () => {
       if (mainWindow === null) {
         createWindow();
       } else {
-        mainWindow.show();
+        // if (mainWindow.isVisible()) {
+        //   mainWindow.hide();
+        // } else {
+        //   mainWindow.show();
+        // }
       }
     });
+    
+    // 添加托盘销毁事件处理
+    tray.on('destroy', () => {
+      console.log('托盘被销毁，尝试重新创建');
+      tray = null; // 确保引用清空
+      setTimeout(createTray, 1000); // 延迟1秒重建托盘
+    });
+    
+    console.log('托盘创建成功');
   } catch (error) {
-    console.error('创建托盘图标失败:', error);
+    console.error('创建托盘失败:', error);
+    // 错误后延迟尝试重建
+    setTimeout(() => {
+      tray = null;
+      createTray();
+    }, 3000);
   }
 }
 
-app.whenReady().then(() => {
-  console.log(`应用数据路径: ${app.getPath('userData')}`);
-  console.log(`配置文件路径: ${configPath}`);
-  
-  // 尝试创建配置目录
-  try {
-    const configDir = path.dirname(configPath);
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-      console.log(`创建配置目录成功: ${configDir}`);
-    }
-  } catch (error) {
-    console.error('创建配置目录失败:', error);
-  }
-  
-  createWindow();
+// 解析相对路径到绝对路径
+function resolveThemeAssetPath(relativePath) {
+  return path.resolve(__dirname, relativePath);
+}
 
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+// 处理主题相对路径转绝对路径
+function processThemesWithAbsolutePaths() {
+  themes.forEach(theme => {
+    if (theme.icon) {
+      theme.absoluteIcon = resolveThemeAssetPath(theme.icon);
+    }
+    if (theme.audio) {
+      theme.absoluteAudio = resolveThemeAssetPath(theme.audio);
+    }
+  });
+}
+
+// 应用初始化
+app.whenReady().then(() => {
+  processThemesWithAbsolutePaths();
+  createWindow();
+  
+  // 注册IPC处理程序
+  setupIPC();
+  
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
   });
 });
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit();
+// 设置IPC通信
+function setupIPC() {
+  // 获取配置
+  ipcMain.handle('get-config', () => {
+    return loadConfig();
+  });
+  
+  // 保存配置
+  ipcMain.handle('save-config', (event, config) => {
+    // 合并当前配置，防止覆盖其他字段
+    const currentConfig = loadConfig();
+    const mergedConfig = { ...currentConfig, ...config };
+    return saveConfig(mergedConfig);
+  });
+  
+  // 获取主题列表
+  ipcMain.handle('get-themes', () => {
+    return themes;
+  });
+  
+  // 获取资源绝对路径
+  ipcMain.handle('get-asset-path', (event, relativePath) => {
+    return resolveThemeAssetPath(relativePath);
+  });
+  
+  // 处理设置窗口关闭请求
+  ipcMain.on('close-settings-window', () => {
+    if (settingsWindow) {
+      settingsWindow.close();
+    }
+  });
+  
+  // 处理设置更新
+  ipcMain.on('settings-updated', (event, config) => {
+    // 更新主窗口
+    if (mainWindow) {
+      // 应用"置顶显示"设置
+      mainWindow.setAlwaysOnTop(config.alwaysOnTop);
+      
+      // 更新"显示功德文字"设置
+      mainWindow.webContents.send('update-show-text', config.isShowText);
+      
+      // 更新"自动敲击"设置
+      if (config.isAutoTap && !autoTapInterval) {
+        startAutoTap();
+      } else if (!config.isAutoTap && autoTapInterval) {
+        stopAutoTap();
+      }
+      
+      // 更新主题
+      mainWindow.webContents.send('update-theme', config.currentTheme);
+    }
+    
+    // 更新托盘菜单
+    updateTrayMenu();
+  });
+}
+
+// 所有窗口关闭时，在macOS中保持应用程序活动状态
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
-// 应用退出前
+// 在应用程序退出之前，确保清理资源
 app.on('before-quit', () => {
   app.isQuitting = true;
   stopAutoTap();
-});
-
-// IPC通信
-ipcMain.handle('get-config', () => {
-  return loadConfig();
-});
-
-ipcMain.handle('save-config', (event, config) => {
-  const result = saveConfig(config);
-  if (result) {
-    updateTrayMenu();
-  }
-  return result;
-});
-
-// 添加处理主题资源路径的函数
-function resolveThemeAssetPath(relativePath) {
-  try {
-    const cleanPath = relativePath.replace(/^\.\.\//, '');
-    const absolutePath = path.join(__dirname, '..', cleanPath);
-    
-    if (fs.existsSync(absolutePath)) {
-      return absolutePath;
-    } else {
-      console.warn(`资源文件不存在: ${absolutePath}`);
-      return null;
-    }
-  } catch (error) {
-    console.error('解析资源路径失败:', error);
-    return null;
-  }
-}
-
-// 在get-themes处理函数中增加绝对路径信息
-ipcMain.handle('get-themes', () => {
-  const themesWithAbsolutePaths = themes.map(theme => {
-    const result = { ...theme };
-    if (theme.icon) {
-      result.absoluteIcon = resolveThemeAssetPath(theme.icon) || theme.icon;
-    }
-    if (theme.audio) {
-      result.absoluteAudio = resolveThemeAssetPath(theme.audio) || theme.audio;
-    }
-    return result;
-  });
-  return themesWithAbsolutePaths;
-});
-
-// 添加置顶和取消置顶的IPC处理
-ipcMain.handle('set-always-on-top', (event, value) => {
-  const config = loadConfig();
-  config.alwaysOnTop = value;
-  saveConfig(config);
-  
-  if (mainWindow) {
-    mainWindow.setAlwaysOnTop(value);
-  }
-  
-  updateTrayMenu();
-  return true;
-});
-
-// 添加最小化窗口的IPC处理
-ipcMain.handle('minimize-window', () => {
-  if (mainWindow) {
-    mainWindow.minimize();
-  }
-  return true;
-});
-
-// 添加隐藏窗口的IPC处理
-ipcMain.handle('hide-window', () => {
-  if (mainWindow) {
-    mainWindow.hide();
-  }
-  return true;
-});
-
-// 添加获取资源文件绝对路径的IPC处理
-ipcMain.handle('get-asset-path', (event, relativePath) => {
-  // 确保路径正确处理
-  const cleanPath = relativePath.replace(/^\.\.\//, '');
-  const absolutePath = path.join(__dirname, '..', cleanPath);
-  
-  // 检查文件是否存在
-  if (fs.existsSync(absolutePath)) {
-    console.log(`资源文件存在: ${absolutePath}`);
-    return absolutePath;
-  } else {
-    console.error(`资源文件不存在: ${absolutePath}`);
-    // 尝试备用路径
-    const alternativePaths = [
-      path.join(__dirname, cleanPath),
-      path.join(app.getAppPath(), cleanPath),
-      path.join(process.resourcesPath, cleanPath)
-    ];
-    
-    for (const altPath of alternativePaths) {
-      if (fs.existsSync(altPath)) {
-        console.log(`找到备用资源: ${altPath}`);
-        return altPath;
-      }
-    }
-    
-    // 都找不到，返回原始路径
-    return absolutePath;
-  }
 }); 

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>木鱼设置</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h2>木鱼设置</h2>
+    </div>
+    
+    <div class="settings-body">
+      <div class="setting-item">
+        <span class="setting-label">置顶显示</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="alwaysOnTop">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-item">
+        <span class="setting-label">自动敲击</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoTap">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-item">
+        <span class="setting-label">显示功德文字</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="showText">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-item">
+        <span class="setting-label">功德文字内容</span>
+        <input type="text" id="customText" placeholder="自定义功德文字">
+      </div>
+      
+      <div class="setting-section">
+        <h3>木鱼主题</h3>
+        <div class="theme-selector" id="themeSelector">
+          <!-- 主题选项将通过JavaScript动态生成 -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-footer">
+      <button id="saveButton">保存设置</button>
+      <button id="cancelButton">取消</button>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html> 
