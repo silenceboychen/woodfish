@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const packageJson = require('../package.json');
 
 // 用于存储数据的配置
 const userDataPath = app.getPath('userData');
@@ -271,6 +272,10 @@ function buildTrayMenu(config) {
       click: () => {
         shell.openExternal('https://github.com/silenceboychen/woodfish');
       }
+    },
+    {
+      label: `版本: ${packageJson.version}`,
+      enabled: false
     },
     { type: 'separator' },
     { 
