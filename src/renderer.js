@@ -169,15 +169,20 @@ function applyTheme(index) {
 
 // 敲击木鱼
 function tap(event) {
+  // 防止敲击过快
   if (tapping) return;
   
-  // 如果是拖动操作，不执行敲击
-  if (event && event.target && (event.target === appContainer || event.target === document.querySelector('.main-content'))) {
-    console.log('忽略拖动区域点击');
+  // 检查是否是自动敲击或木鱼图像的点击
+  const isAutoTap = !event; // 如果没有事件对象，认为是自动敲击
+  const isWoodfishClick = event && event.target === woodfishImg; // 判断点击目标是否为木鱼图像
+  
+  // 如果既不是自动敲击，也不是木鱼图像的点击，则忽略
+  if (!isAutoTap && !isWoodfishClick) {
+    console.log('点击区域不是木鱼图像，忽略:', event.target);
     return;
   }
   
-  console.log('执行敲击，点击目标:', event ? event.target : '自动敲击');
+  console.log('执行敲击，来源:', isAutoTap ? '自动敲击' : '用户点击木鱼');
   tapping = true;
   
   // 添加敲击动画 - 木鱼棒
@@ -315,9 +320,17 @@ async function saveConfig() {
   }
 }
 
-// 事件监听器
-woodfishContainer.addEventListener('click', tap);
-woodfishImg.addEventListener('click', tap); // 直接为木鱼图像添加点击事件
+// 事件监听器 - 只为木鱼图像添加点击事件
+// 使用捕获方式绑定事件，避免事件冒泡问题
+woodfishImg.addEventListener('click', tap, true);
+
+// 确保woodfishContainer不会触发点击事件
+woodfishContainer.addEventListener('click', (event) => {
+  // 如果点击的不是木鱼图像，阻止事件冒泡
+  if (event.target !== woodfishImg) {
+    event.stopPropagation();
+  }
+}, true);
 
 // 鼠标悬停效果
 woodfishContainer.addEventListener('mouseenter', () => {
