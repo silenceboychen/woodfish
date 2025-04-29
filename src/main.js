@@ -191,9 +191,12 @@ function createSettingsWindow() {
   // 创建设置窗口配置
   const settingsWindowOptions = {
     width: 500,
-    height: 600,
+    height: 550,
     title: '木鱼设置',
     resizable: false,
+    frame: false,
+    movable: true,
+    skipTaskbar: false,
     minimizable: false,
     maximizable: false,
     parent: mainWindow,
