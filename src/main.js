@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const packageJson = require('../package.json');
@@ -216,8 +216,6 @@ function createSettingsWindow() {
     skipTaskbar: false,
     minimizable: false,
     maximizable: false,
-    parent: mainWindow,
-    modal: true,
     show: false,
     webPreferences: {
       nodeIntegration: false,
@@ -225,6 +223,19 @@ function createSettingsWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   };
+  
+  // 获取屏幕尺寸
+  // const { screen } = require('electron');
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+  
+  // 计算窗口位置使其居中
+  const x = Math.floor((width - settingsWindowOptions.width) / 2);
+  const y = Math.floor((height - settingsWindowOptions.height) / 2);
+  
+  // 设置窗口位置
+  settingsWindowOptions.x = x;
+  settingsWindowOptions.y = y;
   
   // 非macOS平台设置窗口图标
   if (process.platform !== 'darwin') {
