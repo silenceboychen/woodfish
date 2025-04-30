@@ -148,6 +148,21 @@ function createWindow() {
   if (config.windowPosition) {
     windowOptions.x = config.windowPosition.x;
     windowOptions.y = config.windowPosition.y;
+  } else {
+    // 首次安装时，将窗口放置在屏幕右下角
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+    
+    // 设置右边和下边的边距（像素）
+    const margin = 20;
+    
+    // 计算窗口位置
+    windowOptions.x = screenWidth - windowOptions.width - margin;
+    windowOptions.y = screenHeight - windowOptions.height - margin;
+    
+    // 保存初始位置到配置
+    config.windowPosition = { x: windowOptions.x, y: windowOptions.y };
+    saveConfig(config);
   }
 
   // 非macOS平台设置窗口图标
