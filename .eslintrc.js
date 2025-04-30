@@ -48,6 +48,13 @@ module.exports = {
       exports: 'always-multiline',
       functions: 'never',
     }],
+    // 允许 electron 在 devDependencies 中
+    'import/no-extraneous-dependencies': ['error', {
+      devDependencies: true,
+      optionalDependencies: false,
+      peerDependencies: false,
+      bundledDependencies: false,
+    }],
   },
   globals: {
     // 定义全局变量
