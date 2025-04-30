@@ -16,7 +16,8 @@ const defaultConfig = {
   isAutoTap: true,
   showCalculateNumber: false,
   alwaysOnTop: true,
-  visibleOnAllSpaces: true // 在所有桌面空间显示
+  visibleOnAllSpaces: true, // 在所有桌面空间显示
+  windowPosition: null // 保存窗口位置
 };
 
 // 定义木鱼主题列表
@@ -143,6 +144,12 @@ function createWindow() {
     fullscreenable: false
   };
 
+  // 如果有保存的窗口位置，则使用保存的位置
+  if (config.windowPosition) {
+    windowOptions.x = config.windowPosition.x;
+    windowOptions.y = config.windowPosition.y;
+  }
+
   // 非macOS平台设置窗口图标
   if (process.platform !== 'darwin') {
     const iconPath = path.join(__dirname, '../assets/images/muyu_icon_512.png');
@@ -158,6 +165,14 @@ function createWindow() {
   mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  
+  // 监听窗口移动事件，保存新位置
+  mainWindow.on('moved', () => {
+    const position = mainWindow.getPosition();
+    const currentConfig = loadConfig();
+    currentConfig.windowPosition = { x: position[0], y: position[1] };
+    saveConfig(currentConfig);
+  });
   
   // 在开发环境中打开开发者工具
   // mainWindow.webContents.openDevTools();
