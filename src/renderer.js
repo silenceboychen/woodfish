@@ -50,8 +50,20 @@ async function initApp() {
     
     // 初始化音频播放器
     initAudioPlayer();
+    
+    // 添加系统可见性变化监听（处理休眠/唤醒）
+    document.addEventListener('visibilitychange', handleVisibilityChange);
   } catch (error) {
     console.error('初始化应用失败:', error);
+  }
+}
+
+// 处理页面可见性变化（用于检测系统休眠/唤醒）
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    console.log('页面恢复可见，可能是从休眠状态唤醒，重新初始化音频');
+    // 重新初始化音频
+    initAudioPlayer();
   }
 }
 
@@ -378,6 +390,18 @@ window.ipcRenderer.on('update-theme', (event, themeIndex) => {
   } else {
     console.error('无效的主题索引:', themeIndex);
   }
+});
+
+// 监听显示文字开关设置变更
+window.ipcRenderer.on('update-show-text', (event, isShowText) => {
+  console.log('收到显示文字设置变更:', isShowText);
+  config.isShowText = isShowText;
+});
+
+// 监听系统休眠/唤醒事件
+window.ipcRenderer.on('system-resume', () => {
+  console.log('收到系统恢复事件，重新初始化音频');
+  initAudioPlayer();
 });
 
 // 初始化应用

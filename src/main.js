@@ -381,12 +381,41 @@ app.whenReady().then(() => {
   // 注册IPC处理程序
   setupIPC();
   
+  // 监听系统休眠/唤醒事件
+  powerMonitor();
+  
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
+
+// 监听系统电源状态
+function powerMonitor() {
+  // 确保electron模块已正确加载
+  try {
+    const { powerMonitor } = require('electron');
+    
+    // 系统恢复事件
+    powerMonitor.on('resume', () => {
+      console.log('系统从休眠状态恢复');
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        // 通知渲染进程重新初始化音频
+        mainWindow.webContents.send('system-resume');
+      }
+    });
+    
+    // 系统挂起事件
+    powerMonitor.on('suspend', () => {
+      console.log('系统进入休眠状态');
+    });
+    
+    console.log('电源监控已启动');
+  } catch (error) {
+    console.error('启动电源监控失败:', error);
+  }
+}
 
 // 设置IPC通信
 function setupIPC() {
