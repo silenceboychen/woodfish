@@ -152,7 +152,7 @@ async function saveSettings() {
       // 关闭设置窗口
       setTimeout(() => {
         window.ipcRenderer.send('close-settings-window');
-      }, 1000);
+      }, 2000);
     } else {
       console.error('设置保存失败');
       showError('设置保存失败，请重试');
@@ -163,16 +163,37 @@ async function saveSettings() {
   }
 }
 
+// 显示通知
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  const messageElement = notification.querySelector('.notification-message');
+
+  // 设置消息内容
+  messageElement.textContent = message;
+
+  // 设置通知类型
+  notification.className = 'notification';
+  notification.classList.add(type);
+
+  // 显示通知
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 10);
+
+  // 2秒后自动隐藏
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 2000);
+}
+
 // 显示成功消息
 function showSuccess(message) {
-  // 简单实现，可以根据需要改进
-  alert(message);
+  showNotification(message, 'success');
 }
 
 // 显示错误消息
 function showError(message) {
-  // 简单实现，可以根据需要改进
-  alert(`错误: ${message}`);
+  showNotification(message, 'error');
 }
 
 // 当DOM加载完成时初始化设置
