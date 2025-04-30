@@ -7,7 +7,9 @@
     "start": "electron .",
     "build": "electron-builder",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix"
   },
   "author": "morty <silenceboychen@gmail.com>",
   "license": "MIT",
@@ -19,9 +21,14 @@
   "bugs": {
     "url": "https://github.com/silenceboychen/woodfish/issues"
   },
+  "dependencies": {
+    "electron": "^28.0.0"
+  },
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0"
   },
   "build": {
     "appId": "com.woodfish.app",
@@ -29,15 +36,24 @@
     "mac": {
       "category": "public.app-category.entertainment",
       "icon": "assets/images/muyu_icon_512.png",
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "icon": "assets/images/muyu_icon_512.png",
-      "target": ["nsis", "portable"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "linux": {
       "icon": "assets/images/muyu_icon_512.png",
-      "target": ["AppImage", "deb"]
+      "target": [
+        "AppImage",
+        "deb"
+      ]
     },
     "files": [
       "src/**/*",
@@ -45,4 +61,4 @@
       "node_modules/**/*"
     ]
   }
-} 
+}

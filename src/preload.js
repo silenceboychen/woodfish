@@ -31,10 +31,10 @@ const exposedApi = {
   send: (channel, ...args) => {
     console.log(`发送IPC: ${channel}`, args);
     ipcRenderer.send(channel, ...args);
-  }
+  },
 };
 
 // 暴露API到渲染进程
 contextBridge.exposeInMainWorld('ipcRenderer', exposedApi);
 
-console.log('预加载脚本初始化完成，API已暴露'); 
+console.log('预加载脚本初始化完成，API已暴露');
