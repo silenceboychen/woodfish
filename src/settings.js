@@ -1,5 +1,6 @@
 // DOM 元素
 const alwaysOnTopToggle = document.getElementById('alwaysOnTop');
+const visibleOnAllSpacesToggle = document.getElementById('visibleOnAllSpaces');
 const autoTapToggle = document.getElementById('autoTap');
 const showTextToggle = document.getElementById('showText');
 const customTextInput = document.getElementById('customText');
@@ -39,6 +40,7 @@ async function initSettings() {
 function updateUIFromConfig() {
   // 更新开关状态
   alwaysOnTopToggle.checked = currentConfig.alwaysOnTop || false;
+  visibleOnAllSpacesToggle.checked = currentConfig.visibleOnAllSpaces || false;
   autoTapToggle.checked = currentConfig.isAutoTap || false;
   showTextToggle.checked = currentConfig.isShowText || false;
   
@@ -115,6 +117,10 @@ function addEventListeners() {
   // 监听配置变更
   alwaysOnTopToggle.addEventListener('change', function() {
     currentConfig.alwaysOnTop = this.checked;
+  });
+  
+  visibleOnAllSpacesToggle.addEventListener('change', function() {
+    currentConfig.visibleOnAllSpaces = this.checked;
   });
   
   autoTapToggle.addEventListener('change', function() {

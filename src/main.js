@@ -15,7 +15,8 @@ const defaultConfig = {
   totalNumber: 0,
   isAutoTap: true,
   showCalculateNumber: false,
-  alwaysOnTop: true
+  alwaysOnTop: true,
+  visibleOnAllSpaces: true // 在所有桌面空间显示
 };
 
 // 定义木鱼主题列表
@@ -135,7 +136,11 @@ function createWindow() {
     // 设置窗口不显示在任务栏
     skipTaskbar: false,
     // 设置窗口可移动
-    movable: true
+    movable: true,
+    // 设置窗口在所有桌面空间显示（macOS特性）
+    visibleOnAllWorkspaces: config.visibleOnAllSpaces,
+    // 设置窗口在切换桌面空间时不必须停留在当前桌面
+    fullscreenable: false
   };
 
   // 非macOS平台设置窗口图标
@@ -156,6 +161,17 @@ function createWindow() {
   
   // 在开发环境中打开开发者工具
   // mainWindow.webContents.openDevTools();
+  
+  // 确保窗口在所有桌面空间可见（特别是在macOS上）
+  if (process.platform === 'darwin' && config.visibleOnAllSpaces) {
+    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // 防止在某些情况下设置被重置
+    mainWindow.on('show', () => {
+      if (config.visibleOnAllSpaces) {
+        mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      }
+    });
+  }
   
   // 创建托盘图标
   createTray();
@@ -455,6 +471,11 @@ function setupIPC() {
     if (mainWindow) {
       // 应用"置顶显示"设置
       mainWindow.setAlwaysOnTop(config.alwaysOnTop);
+      
+      // 应用"在所有桌面显示"设置（仅macOS）
+      if (process.platform === 'darwin') {
+        mainWindow.setVisibleOnAllWorkspaces(config.visibleOnAllSpaces);
+      }
       
       // 更新"显示功德文字"设置
       mainWindow.webContents.send('update-show-text', config.isShowText);
