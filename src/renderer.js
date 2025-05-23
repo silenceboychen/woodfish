@@ -21,6 +21,13 @@ let themes = [];
 // 敲击锁定 - 防止用户过快点击
 let tapping = false;
 
+// 拖动和点击检测变量
+let isMouseDown = false;
+let mouseDownTime = 0;
+let mouseDownX = 0;
+let mouseDownY = 0;
+let isDragging = false;
+
 // 初始化应用
 async function initApp() {
   try {
@@ -314,9 +321,73 @@ async function saveConfig() {
   }
 }
 
-// 事件监听器 - 只为木鱼图像添加点击事件
-// 使用捕获方式绑定事件，避免事件冒泡问题
-woodfishImg.addEventListener('click', tap, true);
+// 木鱼图片的鼠标事件处理 - 支持点击和拖动
+woodfishImg.addEventListener('mousedown', (event) => {
+  isMouseDown = true;
+  mouseDownTime = Date.now();
+  mouseDownX = event.clientX;
+  mouseDownY = event.clientY;
+  isDragging = false;
+
+  console.log('木鱼鼠标按下，位置:', mouseDownX, mouseDownY);
+
+  // 阻止默认拖动行为
+  event.preventDefault();
+}, { passive: false });
+
+woodfishImg.addEventListener('mousemove', (event) => {
+  if (!isMouseDown) return;
+
+  const deltaX = Math.abs(event.clientX - mouseDownX);
+  const deltaY = Math.abs(event.clientY - mouseDownY);
+  const timeSinceDown = Date.now() - mouseDownTime;
+
+  // 如果移动距离超过阈值或时间超过阈值，认为是拖动
+  if ((deltaX > 3 || deltaY > 3) && timeSinceDown > 50) {
+    if (!isDragging) {
+      console.log('开始拖动');
+      isDragging = true;
+    }
+
+    // 执行窗口拖动
+    const currentX = event.screenX - mouseDownX;
+    const currentY = event.screenY - mouseDownY;
+    window.ipcRenderer.invoke('set-window-position', currentX, currentY);
+  }
+});
+
+woodfishImg.addEventListener('mouseup', (event) => {
+  if (!isMouseDown) return;
+
+  const clickDuration = Date.now() - mouseDownTime;
+  const deltaX = Math.abs(event.clientX - mouseDownX);
+  const deltaY = Math.abs(event.clientY - mouseDownY);
+
+  console.log('木鱼鼠标释放 - 持续时间:', clickDuration, '移动距离:', deltaX, deltaY, '是否拖动:', isDragging);
+
+  // 如果不是拖动操作且点击时间短，认为是点击操作
+  if (!isDragging && clickDuration < 300 && deltaX < 5 && deltaY < 5) {
+    console.log('检测到点击，触发敲击');
+    tap(event);
+  } else if (isDragging) {
+    console.log('拖动结束');
+  }
+
+  // 重置状态
+  isMouseDown = false;
+  mouseDownTime = 0;
+  mouseDownX = 0;
+  mouseDownY = 0;
+  isDragging = false;
+});
+
+// 防止鼠标离开元素时状态混乱
+woodfishImg.addEventListener('mouseleave', () => {
+  if (isMouseDown && !isDragging) {
+    // 如果鼠标离开但没有拖动，重置状态
+    isMouseDown = false;
+  }
+});
 
 // 确保woodfishContainer不会触发点击事件
 woodfishContainer.addEventListener('click', (event) => {

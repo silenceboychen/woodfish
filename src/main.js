@@ -492,6 +492,20 @@ function setupIPC() {
   // 获取资源绝对路径
   ipcMain.handle('get-asset-path', (event, relativePath) => resolveThemeAssetPath(relativePath));
 
+  // 设置窗口位置（用于拖动）
+  ipcMain.handle('set-window-position', (event, x, y) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      try {
+        mainWindow.setPosition(x, y);
+        return true;
+      } catch (error) {
+        console.error('设置窗口位置失败:', error);
+        return false;
+      }
+    }
+    return false;
+  });
+
   // 处理设置窗口关闭请求
   ipcMain.on('close-settings-window', () => {
     if (settingsWindow) {
