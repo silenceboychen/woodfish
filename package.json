@@ -40,11 +40,12 @@
       ]
     },
     "win": {
-      "icon": "assets/images/muyu_icon_512.png",
+      "icon": "assets/icons/windows/icon.ico",
       "target": [
         "nsis",
         "portable"
-      ]
+      ],
+      "publish": null
     },
     "linux": {
       "icon": "assets/icons/linux",
