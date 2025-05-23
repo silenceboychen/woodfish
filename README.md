@@ -81,6 +81,8 @@ woodfish/
 ├── assets/               # 资源文件
 │   ├── audio/            # 音频文件
 │   ├── images/           # 图片文件（包含高质量矢量图）
+│   ├── icons/            # 多平台图标文件
+│   │   └── linux/        # Linux系统标准尺寸图标
 │   └── examples/         # 示例截图
 ├── src/                  # 源代码
 │   ├── main.js           # 主进程

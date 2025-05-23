@@ -47,11 +47,21 @@
       ]
     },
     "linux": {
-      "icon": "assets/images/muyu_icon_512.png",
+      "icon": "assets/icons/linux",
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "category": "Utility",
+      "desktop": {
+        "Name": "木鱼",
+        "Comment": "敲木鱼应用 - 静心修身",
+        "Keywords": "木鱼;敲击;放松;冥想",
+        "StartupWMClass": "木鱼",
+        "Icon": "woodfish-app"
+      },
+      "fileAssociations": [],
+      "mimeTypes": []
     },
     "files": [
       "src/**/*",
