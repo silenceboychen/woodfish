@@ -41,7 +41,7 @@
         "zip"
       ],
       "publish": null,
-      "artifactName": "${productName}-${version}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "win": {
       "icon": "assets/icons/windows/icon.ico",
@@ -50,10 +50,20 @@
         "portable"
       ],
       "publish": null,
-      "artifactName": "${productName}-${version}.${ext}",
-      "nsis": {
-        "artifactName": "${productName}-Setup-${version}.${ext}"
-      }
+      "artifactName": "${productName}-${version}-${arch}-setup.${ext}"
+    },
+    "nsis": {
+      "artifactName": "${productName}-${version}-${arch}-setup.${ext}",
+      "shortcutName": "${productName}",
+      "uninstallDisplayName": "${productName}",
+      "createDesktopShortcut": "always",
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false,
+      "buildUniversalInstaller": false
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${arch}-portable.${ext}",
+      "buildUniversalInstaller": false
     },
     "linux": {
       "icon": "assets/icons/linux",
@@ -66,13 +76,13 @@
         "Name": "woodfish",
         "Comment": "敲木鱼应用 - 静心修身",
         "Keywords": "木鱼;敲击;放松;冥想",
-        "StartupWMClass": "木鱼",
+        "StartupWMClass": "woodfish",
         "Icon": "woodfish"
       },
       "fileAssociations": [],
       "mimeTypes": [],
       "publish": null,
-      "artifactName": "${productName}-${version}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "files": [
       "src/**/*",
