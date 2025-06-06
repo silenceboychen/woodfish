@@ -43,9 +43,7 @@ jobs:
       - name: Check if should build
         id: should_build
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "should_build=true" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event.inputs.platform }}" == "all" || "${{ github.event.inputs.platform }}" == "" ]]; then
+          if [[ "${{ github.event.inputs.platform }}" == "all" || "${{ github.event.inputs.platform }}" == "" ]]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event.inputs.platform }}" == "macos" && "${{ matrix.os }}" == "macos-latest" ]]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
@@ -67,7 +65,7 @@ jobs:
         if: steps.should_build.outputs.should_build == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       # 安装依赖
