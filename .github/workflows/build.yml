@@ -182,11 +182,10 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
           name: 木鱼应用 ${{ steps.get_version.outputs.VERSION }}
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: ./release-assets/*
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # 清理任务
   cleanup:
