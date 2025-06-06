@@ -1,6 +1,7 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "woodfish-app",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "敲木鱼应用 - Mac客户端",
   "main": "src/main.js",
   "scripts": {

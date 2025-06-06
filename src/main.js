@@ -20,6 +20,7 @@ const defaultConfig = {
   alwaysOnTop: true,
   visibleOnAllSpaces: true, // 在所有桌面空间显示
   windowPosition: null, // 保存窗口位置
+  isMuted: false, // 静音设置，默认不静音
 };
 
 // 定义木鱼主题列表
@@ -240,7 +241,7 @@ function createSettingsWindow() {
   // 创建设置窗口配置
   const settingsWindowOptions = {
     width: 500,
-    height: 600,
+    height: 625,
     title: '木鱼设置',
     resizable: false,
     frame: false,
@@ -537,6 +538,9 @@ function setupIPC() {
 
       // 更新主题
       mainWindow.webContents.send('update-theme', config.currentTheme);
+
+      // 更新静音设置
+      mainWindow.webContents.send('update-muted', config.isMuted);
     }
 
     // 更新托盘菜单

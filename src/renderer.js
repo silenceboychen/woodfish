@@ -13,6 +13,7 @@ let config = {
   isShowText: true, // 默认为true，显示功德文字
   currentText: '功德+1',
   totalNumber: 0,
+  isMuted: false,
 };
 
 // 木鱼主题列表
@@ -261,6 +262,11 @@ function tap(event) {
 
 // 播放敲击音效
 function playTapSound() {
+  // 静音检查
+  if (config.isMuted) {
+    return;
+  }
+
   if (!audioPlayer) {
     console.error('音频播放器未初始化');
     // 尝试重新初始化音频播放器
@@ -455,6 +461,12 @@ window.ipcRenderer.on('update-show-text', (event, isShowText) => {
 window.ipcRenderer.on('system-resume', () => {
   console.log('收到系统恢复事件，重新初始化音频');
   initAudioPlayer();
+});
+
+// 监听静音设置更新
+window.ipcRenderer.on('update-muted', (event, isMuted) => {
+  console.log('收到静音设置变更:', isMuted);
+  config.isMuted = isMuted;
 });
 
 // 初始化应用

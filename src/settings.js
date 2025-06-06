@@ -3,6 +3,7 @@ const alwaysOnTopToggle = document.getElementById('alwaysOnTop');
 const visibleOnAllSpacesToggle = document.getElementById('visibleOnAllSpaces');
 const autoTapToggle = document.getElementById('autoTap');
 const showTextToggle = document.getElementById('showText');
+const isMutedToggle = document.getElementById('isMuted');
 const customTextInput = document.getElementById('customText');
 const themeSelector = document.getElementById('themeSelector');
 const saveButton = document.getElementById('saveButton');
@@ -43,6 +44,7 @@ function updateUIFromConfig() {
   visibleOnAllSpacesToggle.checked = currentConfig.visibleOnAllSpaces || false;
   autoTapToggle.checked = currentConfig.isAutoTap || false;
   showTextToggle.checked = currentConfig.isShowText || false;
+  isMutedToggle.checked = currentConfig.isMuted || false;
 
   // 更新文本输入
   customTextInput.value = currentConfig.currentText || '功德+1';
@@ -129,6 +131,10 @@ function addEventListeners() {
 
   showTextToggle.addEventListener('change', function () {
     currentConfig.isShowText = this.checked;
+  });
+
+  isMutedToggle.addEventListener('change', function () {
+    currentConfig.isMuted = this.checked;
   });
 
   customTextInput.addEventListener('input', function () {
