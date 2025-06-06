@@ -42,6 +42,7 @@ jobs:
       # 检查是否应该为此平台构建
       - name: Check if should build
         id: should_build
+        shell: bash
         run: |
           if [[ "${{ github.event.inputs.platform }}" == "all" || "${{ github.event.inputs.platform }}" == "" ]]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
