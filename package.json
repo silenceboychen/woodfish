@@ -10,7 +10,8 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix"
+    "lint:fix": "eslint src/**/*.js --fix",
+    "validate-ci": "node .github/validate-workflow.js"
   },
   "author": "morty <silenceboychen@gmail.com>",
   "license": "MIT",

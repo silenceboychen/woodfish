@@ -1,0 +1,116 @@
+name: Test Build
+
+# 触发条件：手动触发或 PR
+on:
+  workflow_dispatch:  # 手动触发
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - macos
+        - windows
+        - linux
+  # pull_request:
+  #   branches: [ main, master ]
+  #   paths:
+  #     - 'src/**'
+  #     - 'assets/**'
+  #     - 'package.json'
+  #     - 'package-lock.json'
+
+jobs:
+  test-build:
+    name: Test Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: macos-latest
+            platform: macos
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+        
+    steps:
+      # 检查是否应该为此平台构建
+      - name: Check if should build
+        id: should_build
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.platform }}" == "all" || "${{ github.event.inputs.platform }}" == "" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.platform }}" == "macos" && "${{ matrix.os }}" == "macos-latest" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.platform }}" == "windows" && "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.platform }}" == "linux" && "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 检出代码
+      - name: Checkout code
+        if: steps.should_build.outputs.should_build == 'true'
+        uses: actions/checkout@v4
+
+      # 设置 Node.js 环境
+      - name: Setup Node.js
+        if: steps.should_build.outputs.should_build == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # 安装依赖
+      - name: Install dependencies
+        if: steps.should_build.outputs.should_build == 'true'
+        run: npm ci
+
+      # 运行 ESLint 检查
+      - name: Run ESLint
+        if: steps.should_build.outputs.should_build == 'true'
+        run: npm run lint
+
+      # Linux 平台构建测试
+      - name: Test build for Linux
+        if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libgtk-3-dev libgbm-dev
+          npm run pack  # 只打包，不生成分发文件
+        env:
+          CI: true
+
+      # Windows 平台构建测试
+      - name: Test build for Windows
+        if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'windows'
+        run: npm run pack
+        env:
+          CI: true
+
+      # macOS 平台构建测试
+      - name: Test build for macOS
+        if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'macos'
+        run: npm run pack
+        env:
+          CI: true
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # 上传测试构建产物（仅保留1天）
+      - name: Upload test build
+        if: steps.should_build.outputs.should_build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-build-${{ matrix.platform }}
+          path: |
+            dist/*/
+          retention-days: 1 
