@@ -39,7 +39,8 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "publish": null
     },
     "win": {
       "icon": "assets/icons/windows/icon.ico",
@@ -64,7 +65,8 @@
         "Icon": "woodfish-app"
       },
       "fileAssociations": [],
-      "mimeTypes": []
+      "mimeTypes": [],
+      "publish": null
     },
     "files": [
       "src/**/*",
