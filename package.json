@@ -52,19 +52,6 @@
       "publish": null,
       "artifactName": "${productName}-${version}-${arch}-setup.${ext}"
     },
-    "nsis": {
-      "artifactName": "${productName}-${version}-${arch}-setup.${ext}",
-      "shortcutName": "${productName}",
-      "uninstallDisplayName": "${productName}",
-      "createDesktopShortcut": "always",
-      "allowToChangeInstallationDirectory": true,
-      "oneClick": false,
-      "buildUniversalInstaller": false
-    },
-    "portable": {
-      "artifactName": "${productName}-${version}-${arch}-portable.${ext}",
-      "buildUniversalInstaller": false
-    },
     "linux": {
       "icon": "assets/icons/linux",
       "target": [
