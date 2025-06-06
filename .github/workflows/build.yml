@@ -27,7 +27,16 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      # 安装依赖
+      # 缓存 node_modules 目录
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 安装依赖（如果缓存未命中）
       - name: Install dependencies
         shell: bash
         run: npm ci
