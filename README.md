@@ -1,6 +1,6 @@
 # 木鱼 - Mac/Windows/Ubuntu桌面应用
 
-一款简单而功能丰富的Mac电脑敲木鱼应用，基于Electron开发。
+一款简单而功能丰富的电脑敲木鱼应用，基于Electron开发。
 
 ## 功能特点
 

@@ -47,12 +47,11 @@ git push origin v1.0.6
 
 ### 触发条件
 1. **手动触发**: 在 GitHub Actions 页面点击 "Run workflow"
-2. **Pull Request**: 当 PR 涉及源码变更时自动运行
 
 ### 手动触发选项
 - `all` - 在所有平台上构建（默认）
 - `macos` - 仅在 macOS 上构建
-- `windows` - 仅在 Windows 上构建  
+- `windows` - 仅在 Windows 上构建
 - `linux` - 仅在 Linux 上构建
 
 ### 测试内容
