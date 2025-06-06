@@ -72,6 +72,7 @@ jobs:
       # 缓存 node_modules 目录
       - name: Cache node_modules
         if: steps.should_build.outputs.should_build == 'true'
+        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
@@ -79,9 +80,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # 安装依赖（如果缓存未命中）
-      - name: Install dependencies
+      # 显示缓存状态
+      - name: Cache status
         if: steps.should_build.outputs.should_build == 'true'
+        shell: bash
+        run: |
+          if [[ "${{ steps.cache-node-modules.outputs.cache-hit }}" == "true" ]]; then
+            echo "✅ 缓存命中！跳过 npm ci"
+          else
+            echo "❌ 缓存未命中，将执行 npm ci"
+          fi
+
+      # 安装依赖（仅在缓存未命中时）
+      - name: Install dependencies
+        if: steps.should_build.outputs.should_build == 'true' && steps.cache-node-modules.outputs.cache-hit != 'true'
         shell: bash
         run: npm ci
 
