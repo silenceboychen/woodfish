@@ -10,6 +10,8 @@ module.exports = {
     ecmaVersion: 'latest',
   },
   rules: {
+    // 禁用行结束符检查，避免跨平台开发时的冲突
+    'linebreak-style': 'off',
     // 允许 console 语句，因为这是桌面应用
     'no-console': 'off',
     // 允许在回调函数中使用箭头函数
