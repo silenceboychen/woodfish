@@ -148,7 +148,6 @@ jobs:
           
           **Windows:**
           - \`.exe\` - Windows 安装程序
-          - \`-portable.exe\` - 便携版本
           
           **Linux:**
           - \`.AppImage\` - 通用 Linux 应用
